@@ -1,4 +1,4 @@
-
+来自: https://gitee.com/dayu777/btpanel-v7.7.0
 ### 一键安装7.7版本
 
 适用 Centos/Ubuntu/Debian

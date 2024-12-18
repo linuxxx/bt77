@@ -4,7 +4,7 @@
 适用 Centos/Ubuntu/Debian
 
 ```
-curl -sSO https://github.com/linuxxx/bt77/btpanel-v7.7.0/raw/main/install/install_panel.sh && bash install_panel.sh
+curl -sSO https://raw.githubusercontent.com/linuxxx/bt77/refs/heads/main/install/install_panel.sh && bash install_panel.sh
 ```
 
 `安装完成后,解除进入面板需要账号密码:`

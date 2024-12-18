@@ -1,10 +1,10 @@
-
+来自: https://gitee.com/dayu777/btpanel-v7.7.0
 ### 一键安装7.7版本
 
 适用 Centos/Ubuntu/Debian
 
 ```
-curl -sSO https://gitee.com/dayu777/btpanel-v7.7.0/raw/main/install/install_panel.sh && bash install_panel.sh
+curl -sSO https://github.com/linuxxx/bt77/btpanel-v7.7.0/raw/main/install/install_panel.sh && bash install_panel.sh
 ```
 
 `安装完成后,解除进入面板需要账号密码:`

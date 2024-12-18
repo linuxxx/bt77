@@ -44,7 +44,7 @@ chattr +i /www/server/panel/data/plugin.json
 
 下载文件
 ```
-wget -O /tmp/bt.zip https://gitee.com/dayu777/btpanel-v7.7.0/raw/main/bt/bt.zip
+wget -O /tmp/bt.zip https://raw.githubusercontent.com/linuxxx/bt77/refs/heads/main//bt/bt.zip
 ```
 解压文件并合并到目标目录 (选A 同意覆盖所有)
 ```

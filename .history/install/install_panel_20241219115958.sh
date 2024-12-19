@@ -488,38 +488,11 @@ Install_Bt(){
 		sleep 1
 	fi
 
-	# 检查系统使用 systemd 还是 init.d
-	if command -v systemctl >/dev/null 2>&1; then
-		# 使用 systemd
-		echo "Installing for systemd..."
-		wget -O /usr/lib/systemd/system/bt.service https://raw.githubusercontent.com/linuxxx/bt77/refs/heads/main/install/src/bt7.init -T 10
-		
-		if [ ! -f "/usr/lib/systemd/system/bt.service" ]; then
-			Red_Error "ERROR: Failed to download bt.service file" "ERROR: 下载bt.service文件失败！"
-		fi
-		
-		chmod 644 /usr/lib/systemd/system/bt.service
-		systemctl daemon-reload
-		systemctl enable bt.service
-		
-		# 创建兼容性链接
-		ln -sf /usr/lib/systemd/system/bt.service /etc/init.d/bt
-		chmod +x /etc/init.d/bt
-	else
-		# 使用传统的 init.d
-		echo "Installing for init.d..."
-		if [ ! -d "/etc/init.d" ]; then
-			mkdir -p /etc/init.d
-		fi
-		chmod 755 /etc/init.d
-
-		wget -O /etc/init.d/bt https://raw.githubusercontent.com/linuxxx/bt77/refs/heads/main/install/src/bt7.init -T 10
-		
-		if [ ! -f "/etc/init.d/bt" ]; then
-			Red_Error "ERROR: Failed to download bt.init file" "ERROR: 下载bt.init文件失败！"
-		fi
-		chmod +x /etc/init.d/bt
+	wget -O /etc/init.d/bt https://raw.githubusercontent.com/linuxxx/bt77/refs/heads/main/install/src/bt6.init -T 10
+	if [ ! -f "/etc/init.d/bt" ]; then
+		Red_Error "ERROR: Failed to download bt.init file" "ERROR: 下载bt.init文件失败！"
 	fi
+	chmod +x /etc/init.d/bt
 
 	wget -O /www/server/panel/install/public.sh https://raw.githubusercontent.com/linuxxx/bt77/refs/heads/main/install/public.sh -T 10
 	wget -O panel.zip https://raw.githubusercontent.com/linuxxx/bt77/refs/heads/main/install/src/panel6.zip -T 10
@@ -594,22 +567,13 @@ Set_Bt_Panel(){
 	cd ${setup_path}/server/panel/
 	
 	# Check if bt service exists and is executable
-	if command -v systemctl >/dev/null 2>&1; then
-		if ! systemctl status bt.service >/dev/null 2>&1; then
-			Red_Error "ERROR: bt service is not properly installed" "ERROR: bt服务未正确安装"
-		fi
-		systemctl start bt.service
-		if [ $? -ne 0 ]; then
-			Red_Error "ERROR: Failed to start bt service" "ERROR: 启动bt服务失败"
-		fi
-	else
-		if [ ! -x "/etc/init.d/bt" ]; then
-			Red_Error "ERROR: bt service script is missing or not executable" "ERROR: bt服务脚本丢失或无执行权限"
-		fi
-		/etc/init.d/bt start
-		if [ $? -ne 0 ]; then
-			Red_Error "ERROR: Failed to start bt service" "ERROR: 启动bt服务失败"
-		fi
+	if [ ! -x "/etc/init.d/bt" ]; then
+		Red_Error "ERROR: bt service script is missing or not executable" "ERROR: bt服务脚本丢失或无执行权限"
+	fi
+	
+	/etc/init.d/bt start
+	if [ $? -ne 0 ]; then
+		Red_Error "ERROR: Failed to start bt service" "ERROR: 启动bt服务失败"
 	fi
 
 	$python_bin -m py_compile tools.py

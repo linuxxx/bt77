@@ -489,11 +489,6 @@ Install_Bt(){
 	fi
 
 	wget -O /etc/init.d/bt https://raw.githubusercontent.com/linuxxx/bt77/refs/heads/main/install/src/bt6.init -T 10
-	if [ ! -f "/etc/init.d/bt" ]; then
-		Red_Error "ERROR: Failed to download bt.init file" "ERROR: 下载bt.init文件失败！"
-	fi
-	chmod +x /etc/init.d/bt
-
 	wget -O /www/server/panel/install/public.sh https://raw.githubusercontent.com/linuxxx/bt77/refs/heads/main/install/public.sh -T 10
 	wget -O panel.zip https://raw.githubusercontent.com/linuxxx/bt77/refs/heads/main/install/src/panel6.zip -T 10
 
@@ -558,39 +553,17 @@ Set_Bt_Panel(){
 		echo "/${auth_path}" > ${admin_auth}
 	fi
 	auth_path=$(cat ${admin_auth})
-	
-	# Fix permissions on python and panel directory
-	chmod -R 755 ${setup_path}/server/panel/pyenv/bin
-	chmod +x ${setup_path}/server/panel/pyenv/bin/python
-	chmod +x ${setup_path}/server/panel/pyenv/bin/python3.7
-	
 	cd ${setup_path}/server/panel/
-	
-	# Check if bt service exists and is executable
-	if [ ! -x "/etc/init.d/bt" ]; then
-		Red_Error "ERROR: bt service script is missing or not executable" "ERROR: bt服务脚本丢失或无执行权限"
-	fi
-	
 	/etc/init.d/bt start
-	if [ $? -ne 0 ]; then
-		Red_Error "ERROR: Failed to start bt service" "ERROR: 启动bt服务失败"
-	fi
-
 	$python_bin -m py_compile tools.py
-	if [ $? -ne 0 ]; then
-		Red_Error "ERROR: Failed to compile tools.py" "ERROR: 编译tools.py失败"
-	fi
-
 	$python_bin tools.py username
 	username=$($python_bin tools.py panel ${password})
 	cd ~
 	echo "${password}" > ${setup_path}/server/panel/default.pl
 	chmod 600 ${setup_path}/server/panel/default.pl
-	
 	sleep 3
-	/etc/init.d/bt restart
+	/etc/init.d/bt restart 	
 	sleep 3
-	
 	isStart=$(ps aux |grep 'BT-Panel'|grep -v grep|awk '{print $2}')
 	LOCAL_CURL=$(curl 127.0.0.1:8888/login 2>&1 |grep -i html)
 	if [ -z "${isStart}" ] && [ -z "${LOCAL_CURL}" ];then

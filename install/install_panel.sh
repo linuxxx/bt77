@@ -553,8 +553,12 @@ Set_Bt_Panel(){
 		echo "/${auth_path}" > ${admin_auth}
 	fi
 	auth_path=$(cat ${admin_auth})
+	chmod -R 755 ${setup_path}/server/panel/pyenv/bin
+	chmod +x ${setup_path}/server/panel/pyenv/bin/python
+	chmod +x ${setup_path}/server/panel/pyenv/bin/python3.7
 	cd ${setup_path}/server/panel/
 	/etc/init.d/bt start
+
 	$python_bin -m py_compile tools.py
 	$python_bin tools.py username
 	username=$($python_bin tools.py panel ${password})

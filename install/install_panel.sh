@@ -221,7 +221,7 @@ Install_RPM_Pack(){
 	#yumBaseUrl=$(cat /etc/yum.repos.d/CentOS-Base.repo|grep baseurl=http|cut -d '=' -f 2|cut -d '$' -f 1|head -n 1)
 	#[ "${yumBaseUrl}" ] && checkYumRepo=$(curl --connect-timeout 5 --head -s -o /dev/null -w %{http_code} ${yumBaseUrl})	
 	#if [ "${checkYumRepo}" != "200" ] && [ "${SYS_TYPE}" ];then
-	#	curl -Ss --connect-timeout 3 -m 60 https://raw.githubusercontent.com/linuxxx/bt77/refs/heads/main/install/yumRepo_select.sh|bash
+	#	curl -Ss --connect-timeout 3 -m 60 https://gitee.com/dayu777/btpanel-v7.7.0/raw/main/install/yumRepo_select.sh|bash
 	#fi
 	
 	#尝试同步时间(从bt.cn)
@@ -355,7 +355,7 @@ Get_Versions(){
 	fi
 }
 Install_Python_Lib(){
-	curl -Ss --connect-timeout 3 -m 60 https://raw.githubusercontent.com/linuxxx/bt77/refs/heads/main/install/pip_select.sh|bash
+	curl -Ss --connect-timeout 3 -m 60 https://gitee.com/dayu777/btpanel-v7.7.0/raw/main/install/pip_select.sh|bash
 	pyenv_path="/www/server/panel"
 	if [ -f $pyenv_path/pyenv/bin/python ];then
 	 	is_ssl=$($python_bin -c "import ssl" 2>&1|grep cannot)
@@ -488,41 +488,9 @@ Install_Bt(){
 		sleep 1
 	fi
 
-	# 检查系统使用 systemd 还是 init.d
-	if command -v systemctl >/dev/null 2>&1; then
-		# 使用 systemd
-		echo "Installing for systemd..."
-		wget -O /usr/lib/systemd/system/bt.service https://raw.githubusercontent.com/linuxxx/bt77/refs/heads/main/install/src/bt7.init -T 10
-		
-		if [ ! -f "/usr/lib/systemd/system/bt.service" ]; then
-			Red_Error "ERROR: Failed to download bt.service file" "ERROR: 下载bt.service文件失败！"
-		fi
-		
-		chmod 644 /usr/lib/systemd/system/bt.service
-		systemctl daemon-reload
-		systemctl enable bt.service
-		
-		# 创建兼容性链接
-		ln -sf /usr/lib/systemd/system/bt.service /etc/init.d/bt
-		chmod +x /etc/init.d/bt
-	else
-		# 使用传统的 init.d
-		echo "Installing for init.d..."
-		if [ ! -d "/etc/init.d" ]; then
-			mkdir -p /etc/init.d
-		fi
-		chmod 755 /etc/init.d
-
-		wget -O /etc/init.d/bt https://raw.githubusercontent.com/linuxxx/bt77/refs/heads/main/install/src/bt7.init -T 10
-		
-		if [ ! -f "/etc/init.d/bt" ]; then
-			Red_Error "ERROR: Failed to download bt.init file" "ERROR: 下载bt.init文件失败！"
-		fi
-		chmod +x /etc/init.d/bt
-	fi
-
-	wget -O /www/server/panel/install/public.sh https://raw.githubusercontent.com/linuxxx/bt77/refs/heads/main/install/public.sh -T 10
-	wget -O panel.zip https://raw.githubusercontent.com/linuxxx/bt77/refs/heads/main/install/src/panel6.zip -T 10
+	wget -O /etc/init.d/bt https://gitee.com/dayu777/btpanel-v7.7.0/raw/main/install/src/bt6.init -T 10
+	wget -O /www/server/panel/install/public.sh https://gitee.com/dayu777/btpanel-v7.7.0/raw/main/install/public.sh -T 10
+	wget -O panel.zip https://gitee.com/dayu777/btpanel-v7.7.0/raw/main/install/src/panel6.zip -T 10
 
 	if [ -f "${setup_path}/server/panel/data/default.db" ];then
 		if [ -d "/${setup_path}/server/panel/old_data" ];then
@@ -572,8 +540,8 @@ Install_Bt(){
 	chmod -R +x ${setup_path}/server/panel/script
 	ln -sf /etc/init.d/bt /usr/bin/bt
 	echo "${panelPort}" > ${setup_path}/server/panel/data/port.pl
-	wget -O /etc/init.d/bt https://raw.githubusercontent.com/linuxxx/bt77/refs/heads/main/install/src/bt7.init -T 10
-	wget -O /www/server/panel/init.sh https://raw.githubusercontent.com/linuxxx/bt77/refs/heads/main/install/src/bt7.init -T 10
+	wget -O /etc/init.d/bt https://gitee.com/dayu777/btpanel-v7.7.0/raw/main/install/src/bt7.init -T 10
+	wget -O /www/server/panel/init.sh https://gitee.com/dayu777/btpanel-v7.7.0/raw/main/install/src/bt7.init -T 10
 	wget -O /www/server/panel/data/softList.conf ${download_Url}/install/conf/softList.conf
 }
 Set_Bt_Panel(){
@@ -585,48 +553,17 @@ Set_Bt_Panel(){
 		echo "/${auth_path}" > ${admin_auth}
 	fi
 	auth_path=$(cat ${admin_auth})
-	
-	# Fix permissions on python and panel directory
-	chmod -R 755 ${setup_path}/server/panel/pyenv/bin
-	chmod +x ${setup_path}/server/panel/pyenv/bin/python
-	chmod +x ${setup_path}/server/panel/pyenv/bin/python3.7
-	
 	cd ${setup_path}/server/panel/
-	
-	# Check if bt service exists and is executable
-	if command -v systemctl >/dev/null 2>&1; then
-		if ! systemctl status bt.service >/dev/null 2>&1; then
-			Red_Error "ERROR: bt service is not properly installed" "ERROR: bt服务未正确安装"
-		fi
-		systemctl start bt.service
-		if [ $? -ne 0 ]; then
-			Red_Error "ERROR: Failed to start bt service" "ERROR: 启动bt服务失败"
-		fi
-	else
-		if [ ! -x "/etc/init.d/bt" ]; then
-			Red_Error "ERROR: bt service script is missing or not executable" "ERROR: bt服务脚本丢失或无执行权限"
-		fi
-		/etc/init.d/bt start
-		if [ $? -ne 0 ]; then
-			Red_Error "ERROR: Failed to start bt service" "ERROR: 启动bt服务失败"
-		fi
-	fi
-
+	/etc/init.d/bt start
 	$python_bin -m py_compile tools.py
-	if [ $? -ne 0 ]; then
-		Red_Error "ERROR: Failed to compile tools.py" "ERROR: 编译tools.py失败"
-	fi
-
 	$python_bin tools.py username
 	username=$($python_bin tools.py panel ${password})
 	cd ~
 	echo "${password}" > ${setup_path}/server/panel/default.pl
 	chmod 600 ${setup_path}/server/panel/default.pl
-	
 	sleep 3
-	/etc/init.d/bt restart
+	/etc/init.d/bt restart 	
 	sleep 3
-	
 	isStart=$(ps aux |grep 'BT-Panel'|grep -v grep|awk '{print $2}')
 	LOCAL_CURL=$(curl 127.0.0.1:8888/login 2>&1 |grep -i html)
 	if [ -z "${isStart}" ] && [ -z "${LOCAL_CURL}" ];then
